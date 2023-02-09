@@ -1,20 +1,60 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+import {
+  IBMPlexSans_400Regular,
+  IBMPlexSans_600SemiBold,
+  IBMPlexSans_700Bold,
+} from "@expo-google-fonts/ibm-plex-sans";
+
+import MainScreen from "./screens/MainScreen";
+import CreateNoteScreen from "./screens/CreateNoteScreen";
+import NoteDetailScreen from "./screens/NoteDetailScreen";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  // Loading the Fonts and show Splash Screen while it loads
+  let [fontsLoaded] = useFonts({
+    IBMPlexSans_400Regular,
+    IBMPlexSans_600SemiBold,
+    IBMPlexSans_700Bold,
+  });
+
+  useEffect(() => {
+    async function prepare() {
+      // Keep the splash screen visible while we fetch resources
+      await SplashScreen.preventAutoHideAsync();
+    }
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer onReady={onLayoutRootView}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+        contentStyle={{
+          backgroundColor: "#FFFFFF",
+        }}
+      >
+        <Stack.Screen name="MainScreen" component={MainScreen} />
+        <Stack.Screen name="CreateNoteScreen" component={CreateNoteScreen} />
+        <Stack.Screen name="NoteDetailScreen" component={NoteDetailScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
